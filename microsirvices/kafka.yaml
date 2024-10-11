@@ -1,0 +1,114 @@
+asyncapi: 3.0.0
+info:
+  title: Smart Home Application
+  version: 1.0.0
+  description: Описание сообщений в системе умного дома 
+servers:
+  local:
+    host: 'kafka-broker:9092'
+    protocol: kafka
+
+components:
+  schemas:
+    DeviceConfigurationMain:
+      contentType: application/json
+      type: object
+      properties:
+          device_id:
+              type: integer
+              format: int64
+              description: Уникальный идентификатор устройства
+          configType:
+            type: string
+            enum: ["set-temperature"]
+            description: Значение типа конфигурации для возможности распарсить json
+      required: 
+        - device_id
+        - configType
+    SetTemperatureDeviceConfigurationBody:
+      contentType: application/json
+      type: object
+      properties:
+          temperature:
+              type: integer
+              format: int64
+              description: Значение температуры
+      required: 
+        - temperature
+    TelemetryDataMain:
+      contentType: application/json
+      type: object
+      properties:
+          device_id:
+            type: integer
+            format: int64
+            description: Уникальный идентификатор устройства
+          timestamp:
+            type: string
+            format: date-time
+            description: Дата и время получения данных с устройства
+          dataType:
+            type: string
+            enum: ["temperature"]
+            description: Значение типа телеметрических данных
+      required: 
+        - timestamp
+        - device_id
+        - dataType
+    TemperatureTelemetryDataBody:
+      contentType: application/json
+      type: object
+      properties:
+        temperature:
+          type: integer
+          description: 'Текущее значение температуры'
+          required: 
+            - temperature
+channels:
+  device-configuration:
+    address: device-configuration
+    messages:
+      temperatureDeviceConfiguration:
+        contentType: application/json
+        payload:
+          type: object
+          properties:
+            main:
+              $ref: "#/components/schemas/DeviceConfigurationMain"
+            body:
+              $ref: "#/components/schemas/SetTemperatureDeviceConfigurationBody"
+          required:
+            - main
+            - body
+    description: Топик для отправки событий об изменении конфигурации устройства
+  telemetry-data-topic:
+    address: telemetry-data-topic
+    messages:
+      temperatureTelemetryData:
+        contentType: application/json
+        payload:
+          type: object
+          properties:
+            main:
+              $ref: "#/components/schemas/TelemetryDataMain"
+            body:
+              $ref: "#/components/schemas/TemperatureTelemetryDataBody"    
+          required:
+            - main
+            - body
+    description: Топик для получения данных c датчиков устройств
+
+operations:
+  telemetry-data-topic:
+    action: send
+    channel:
+      $ref: '#/channels/telemetry-data-topic'
+    messages:
+      - $ref: '#/channels/telemetry-data-topic/messages/temperatureTelemetryData'
+  device-configuration-topic:
+    action: send
+    channel:
+      $ref: '#/channels/device-configuration'
+    messages:
+      - $ref: '#/channels/device-configuration/messages/temperatureDeviceConfiguration'
+

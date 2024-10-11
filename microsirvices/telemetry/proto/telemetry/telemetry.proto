@@ -1,0 +1,122 @@
+syntax = "proto3";
+
+package telemetry;
+
+option go_package = "github.com/nini-k/architecture-sprint-3/microsirvices/telemetry";
+
+import "google/api/annotations.proto";
+import "google/protobuf/timestamp.proto";
+import "protoc-gen-openapiv2/options/annotations.proto";
+
+option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
+  info: {
+    title: "Telemetry API";
+    version: "1.0";
+    description: "Микросервис для сбора телеметрических данных с устройств";
+    contact: {
+      name: "device-manager";
+      url: "github.com/nini-k/architecture-sprint-3/microsirvices/telemtry";
+      email: "none@example.com";
+    };
+    license: {
+      name: "";
+      url: "";
+    };
+  };
+  schemes: HTTP;
+  consumes: "application/json";
+  produces: "application/json";
+};
+
+service TelemetryService {
+	rpc ListLatestDeviceTelemetry(ListLatestDeviceTelemetryRequest) returns (ListLatestDeviceTelemetryResponse) {
+		option (google.api.http) = {
+      		get: "/devices/{id}/telemetry/latest"
+    	};
+		option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+			summary: "Получить последние телеметрические данные с датчиков устройства";
+			responses: {
+				key: "400";
+				value: {
+					description: "При некорретных значениях id";
+					schema: {
+						json_schema: {
+							ref: "#/definitions/rpcStatus";
+						}
+					}
+				}
+			};
+		};
+	};
+
+	rpc ListDeviceTelemetry(ListDeviceTelemetryRequest) returns (ListDeviceTelemetryResponse) {
+		option (google.api.http) = {
+      		get: "/devices/{id}/telemetry"
+    	};
+		option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+			summary: "Получить исторические телеметрические данные";
+			responses: {
+				key: "400";
+				value: {
+					description: "При некорретных значениях page_size или id";
+					schema: {
+						json_schema: {
+							ref: "#/definitions/rpcStatus";
+						}
+					}
+				}
+			};
+		};
+	};
+}
+
+message ListLatestDeviceTelemetryRequest {
+	option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_schema) = {
+    	json_schema: {
+        	required: ["id", "page_size"]
+      	}
+    };
+
+	int64 id = 1;
+	int32 page_size = 2;
+
+	optional Cursor cursor = 3;
+}
+
+message ListLatestDeviceTelemetryResponse {
+	repeated TelemetryData records = 1;	
+}
+
+message ListDeviceTelemetryRequest {
+	option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_schema) = {
+    	json_schema: {
+        	required: ["id"]
+      	}
+    };
+
+	int64 id = 1;
+}
+
+message ListDeviceTelemetryResponse {
+	repeated TelemetryData records = 1;	
+	Cursor next_cursor = 2;
+}
+
+message Cursor {
+	oneof entity {
+		int64 id = 1; 
+	}
+}
+
+message TelemetryData {
+	int64 id = 1; 
+	google.protobuf.Timestamp created_at = 2;
+	oneof data {
+		TemperatureTelemetryData temperature_telemetry_data = 3;
+	}
+}
+
+message TemperatureTelemetryData {
+	int32 temperature = 1;
+}
+

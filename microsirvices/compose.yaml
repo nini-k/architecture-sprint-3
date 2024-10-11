@@ -1,0 +1,61 @@
+services:
+  device-manager:
+    container_name: device-manager
+    build: 
+      context: device-manager
+      dockerfile: Dockerfile
+    depends_on:
+      - device-manager-db
+    ports:
+      - 9091:9091
+    environment:
+      POSTGRES_URL: "postgresql://device-manager-db:5432/device-manager?user=device-manager-user&password=1234"
+      GRPC_ENDPOINT: 0.0.0.0:9090
+      GRPC_GATEWAY_ENDPOINT: 0.0.0.0:9091
+    networks:
+      app-network:
+  device-manager-db: 
+    image: postgres
+    container_name: device-manager-db
+    environment:
+      POSTGRES_PASSWORD: 1234
+      POSTGRES_USER: device-manager-user
+      POSTGRES_DB: device-manager
+      POSTGRES_HOST_AUTH_METHOD: trust
+    networks:
+      app-network:
+  telemetry:
+    container_name: device-manager
+    build: 
+      context: telemetry
+      dockerfile: Dockerfile
+    depends_on:
+      - telemetry-db
+    ports:
+      - 9091:9091
+    environment:
+      MONGO_URL: "mongodb://telemetry-user:1234@telemetry-db:27018/telemetry"
+      GRPC_ENDPOINT: 0.0.0.0:9090
+      GRPC_GATEWAY_ENDPOINT: 0.0.0.0:9091
+    networks:
+      app-network:
+  telemetry-db:
+    image: dh-mirror.gitverse.ru/mongo:latest
+    container_name: telemetry-db
+    ports:
+      - "27018:27018"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: telemetry-user
+      MONGO_INITDB_ROOT_PASSWORD: 1234
+      MONGO_INITDB_DATABASE: telemetry
+    networks:
+      app-network:
+    command:
+      [
+        "--bind_ip_all",
+        "--port", "27018"
+      ]
+
+networks:
+  app-network:
+    driver: bridge

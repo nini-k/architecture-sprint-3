@@ -1,0 +1,57 @@
+@startuml ERDiagram
+
+entity User {
+    * id : big int
+    --
+    * username : string
+    * password : hash
+    * created_at : timestamp
+}
+
+entity House {
+    * id : big int
+    --
+    * address : string
+    * owner_id : big int
+    * created_at : timestamp
+}
+
+entity DeviceType {
+    * id : int
+    --
+    * name : string
+}
+
+entity Device {
+    * id : big int
+    --
+    * name : string
+    * house_id: big int
+    * type_id : int
+    * status : bool
+    * serial_number : string
+    * created_at : timestamp
+}
+
+entity DeviceConfiguration {
+    * device_id : big int 
+    --
+    * data : json
+    * updated_at : timestamp
+}
+
+entity TelemetryData {
+    * id : big int
+    --
+    * ts : timestamp
+    * data : json
+    --
+    * device_id : big int
+}
+
+User "1" -- "N"  House  : ""
+DeviceType "1" -- "N" Device : "" 
+Device "1" -- "1" DeviceConfiguration : ""
+Device "1" -- "N" TelemetryData : ""
+House "1" -- "N" Device
+@enduml

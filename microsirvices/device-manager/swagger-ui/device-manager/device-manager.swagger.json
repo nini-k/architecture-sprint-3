@@ -1,0 +1,395 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Device Manager API",
+    "description": "Микросервис для управления устройствами умного дома",
+    "version": "1.0",
+    "contact": {
+      "name": "device-manager",
+      "url": "github.com/nini-k/architecture-sprint-3/microsirvices/device-manager",
+      "email": "none@example.com"
+    },
+    "license": {}
+  },
+  "tags": [
+    {
+      "name": "DeviceManagerService"
+    }
+  ],
+  "schemes": [
+    "http"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/devices": {
+      "post": {
+        "summary": "Добавить новое устройство",
+        "operationId": "DeviceManagerService_AddDevice",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/device_managerAddDeviceResponse"
+            }
+          },
+          "400": {
+            "description": "При некорректных значениях device",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/device_managerAddDeviceRequest"
+            }
+          }
+        ],
+        "tags": [
+          "DeviceManagerService"
+        ]
+      }
+    },
+    "/devices/{id}": {
+      "get": {
+        "summary": "Получить информации об устройстве",
+        "operationId": "DeviceManagerService_GetDevice",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/device_managerGetDeviceResponse"
+            }
+          },
+          "400": {
+            "description": "При некорректных значениях id",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          },
+          "404": {
+            "description": "Не удалось найти устройство",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          }
+        ],
+        "tags": [
+          "DeviceManagerService"
+        ]
+      }
+    },
+    "/devices/{id}/commands": {
+      "get": {
+        "summary": "Получить текущее значение устанавленных команд устройства",
+        "operationId": "DeviceManagerService_GetDeviceCommands",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/device_managerGetDeviceCommandsResponse"
+            }
+          },
+          "400": {
+            "description": "Returned when input arguments is incorrect.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          },
+          "404": {
+            "description": "Не найдено устройство",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          }
+        ],
+        "tags": [
+          "DeviceManagerService"
+        ]
+      },
+      "post": {
+        "summary": "Задать команды устройству",
+        "operationId": "DeviceManagerService_SetDeviceCommands",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/device_managerSetDeviceCommandsResponse"
+            }
+          },
+          "400": {
+            "description": "При некорректных значениях id и параметров команды",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          },
+          "404": {
+            "description": "Не удалось найти устройства",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/DeviceManagerServiceSetDeviceCommandsBody"
+            }
+          }
+        ],
+        "tags": [
+          "DeviceManagerService"
+        ]
+      }
+    },
+    "/devices/{id}/status": {
+      "put": {
+        "summary": "Изменить статус устройства",
+        "operationId": "DeviceManagerService_PutDeviceStatus",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/device_managerPutDeviceStatusResponse"
+            }
+          },
+          "400": {
+            "description": "При некорректных значениях id",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          },
+          "404": {
+            "description": "Не удалось найти устройство",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/DeviceManagerServicePutDeviceStatusBody"
+            }
+          }
+        ],
+        "tags": [
+          "DeviceManagerService"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "DeviceManagerServicePutDeviceStatusBody": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "status"
+      ]
+    },
+    "DeviceManagerServiceSetDeviceCommandsBody": {
+      "type": "object",
+      "properties": {
+        "temperature": {
+          "$ref": "#/definitions/device_managerTemperatureCommands"
+        }
+      },
+      "required": [
+        "commands"
+      ]
+    },
+    "device_managerAddDeviceRequest": {
+      "type": "object",
+      "properties": {
+        "device": {
+          "$ref": "#/definitions/device_managerDevice"
+        }
+      },
+      "required": [
+        "device"
+      ]
+    },
+    "device_managerAddDeviceResponse": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "int64"
+        }
+      }
+    },
+    "device_managerDevice": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "houseId": {
+          "type": "string",
+          "format": "int64"
+        },
+        "type": {
+          "$ref": "#/definitions/device_managerDeviceType"
+        },
+        "serialNumber": {
+          "type": "string"
+        },
+        "status": {
+          "type": "boolean"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "device_managerDeviceType": {
+      "type": "string",
+      "enum": [
+        "TYPE_UNSPECIFIED",
+        "TYPE_HEATING_SYSTEM"
+      ],
+      "default": "TYPE_UNSPECIFIED"
+    },
+    "device_managerGetDeviceCommandsResponse": {
+      "type": "object",
+      "properties": {
+        "temperature": {
+          "$ref": "#/definitions/device_managerTemperatureCommands"
+        }
+      }
+    },
+    "device_managerGetDeviceResponse": {
+      "type": "object",
+      "properties": {
+        "device": {
+          "$ref": "#/definitions/device_managerDevice"
+        }
+      }
+    },
+    "device_managerPutDeviceStatusResponse": {
+      "type": "object"
+    },
+    "device_managerSetDeviceCommandsResponse": {
+      "type": "object"
+    },
+    "device_managerTemperatureCommands": {
+      "type": "object",
+      "properties": {
+        "targetTemperature": {
+          "type": "integer",
+          "format": "int32"
+        }
+      }
+    },
+    "protobufAny": {
+      "type": "object",
+      "properties": {
+        "@type": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": {}
+    },
+    "rpcStatus": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/protobufAny"
+          }
+        }
+      }
+    }
+  }
+}
