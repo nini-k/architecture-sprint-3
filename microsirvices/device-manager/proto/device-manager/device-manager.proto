@@ -1,0 +1,270 @@
+syntax = "proto3";
+
+package device_manager;
+
+option go_package = "github.com/nini-k/architecture-sprint-3/microsirvices/device-manager";
+
+import "google/api/annotations.proto";
+import "google/protobuf/timestamp.proto";
+import "protoc-gen-openapiv2/options/annotations.proto";
+
+option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
+  info: {
+    title: "Device Manager API";
+    version: "1.0";
+    description: "Микросервис для управления устройствами умного дома";
+    contact: {
+      name: "device-manager";
+      url: "github.com/nini-k/architecture-sprint-3/microsirvices/device-manager";
+      email: "none@example.com";
+    };
+    license: {
+      name: "";
+      url: "";
+    };
+  };
+  schemes: HTTP;
+  consumes: "application/json";
+  produces: "application/json";
+};
+
+service DeviceManagerService {
+	rpc GetDevice(GetDeviceRequest) returns (GetDeviceResponse) {
+		option (google.api.http) = {
+      		get: "/devices/{id}"
+    	};
+
+		option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+			summary: "Получить информации об устройстве";
+			responses: {
+				key: "400";
+				value: {
+					description: "При некорректных значениях id";
+					schema: {
+						json_schema: {
+							ref: "#/definitions/rpcStatus";
+						}
+					}
+				}
+			};
+			responses: {
+				key: "404";
+				value: {
+					description: "Не найдено устройство";
+					schema: {
+						json_schema: {
+							ref: "#/definitions/rpcStatus";
+						}
+					}
+				}
+			};
+		};
+	};
+
+	rpc AddDevice(AddDeviceRequest) returns (AddDeviceResponse) {
+		option (google.api.http) = {
+      		post: "/devices"
+			body: "*"
+    	};
+		option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+			summary: "Добавить новое устройство";
+			responses: {
+				key: "400";
+				value: {
+					description: "При некорректных значениях device";
+					schema: {
+						json_schema: {
+							ref: "#/definitions/rpcStatus";
+						}
+					}
+				}
+			};
+		};
+	};
+
+	rpc PutDeviceStatus(PutDeviceStatusRequest) returns (PutDeviceStatusResponse) {
+		option (google.api.http) = {
+      		put: "/devices/{id}/status"
+			body: "*"
+    	};
+		option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+			summary: "Изменить статус устройства";
+			responses: {
+				key: "400";
+				value: {
+					description: "При некорректных значениях id";
+					schema: {
+						json_schema: {
+							ref: "#/definitions/rpcStatus";
+						}
+					}
+				}
+			};
+			responses: {
+				key: "404";
+				value: {
+					description: "Не найдено устройство";
+					schema: {
+						json_schema: {
+							ref: "#/definitions/rpcStatus";
+						}
+					}
+				}
+			};
+		};
+	};
+
+	rpc SetDeviceCommands(SetDeviceCommandsRequest) returns (SetDeviceCommandsResponse) {
+		option (google.api.http) = {
+      		post: "/devices/{id}/commands"
+			body: "*"
+    	};
+		option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+			summary: "Задать команды устройству";
+			responses: {
+				key: "400";
+				value: {
+					description: "При некорректных значениях id и параметров команды";
+					schema: {
+						json_schema: {
+							ref: "#/definitions/rpcStatus";
+						}
+					}
+				}
+			};
+			responses: {
+				key: "404";
+				value: {
+					description: "Не удалось найти устройства";
+					schema: {
+						json_schema: {
+							ref: "#/definitions/rpcStatus";
+						}
+					}
+				}
+			};
+		};
+	};
+
+	rpc GetDeviceCommands(GetDeviceCommandsRequest) returns (GetDeviceCommandsResponse) {
+		option (google.api.http) = {
+      		get: "/devices/{id}/commands"
+    	};
+		option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+			summary: "Получить текущее значение устанавленных команд устройства";
+			responses: {
+				key: "400";
+				value: {
+					description: "Returned when input arguments is incorrect.";
+					schema: {
+						json_schema: {
+							ref: "#/definitions/rpcStatus";
+						}
+					}
+				}
+			};
+			responses: {
+				key: "404";
+				value: {
+					description: "Не найдено устройство";
+					schema: {
+						json_schema: {
+							ref: "#/definitions/rpcStatus";
+						}
+					}
+				}
+			};
+		};
+	};
+}
+
+message GetDeviceRequest {
+	option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_schema) = {
+    	json_schema: {
+        	required: ["id"]
+      	}
+    };
+
+	int64 id = 1;
+}
+
+message GetDeviceResponse {
+
+	Device device = 1;
+}
+
+message PutDeviceStatusRequest {
+	option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_schema) = {
+    	json_schema: {
+        	required: ["id", "status"]
+      	}
+    };
+
+	int64 id = 1;
+	bool status = 2;
+}
+
+message PutDeviceStatusResponse {}
+
+message SetDeviceCommandsRequest {
+	option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_schema) = {
+    	json_schema: {
+        	required: ["id", "commands"]
+      	}
+    };
+
+	int64 id = 1;
+	oneof commands {
+		TemperatureCommands temperature = 2;
+	}
+}
+
+message SetDeviceCommandsResponse {}
+
+message AddDeviceRequest {
+	option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_schema) = {
+    	json_schema: {
+        	required: ["device"]
+      	}
+    };
+
+	Device device = 1;
+}
+
+message AddDeviceResponse {
+	int64 id = 1;
+}
+
+message GetDeviceCommandsRequest {
+	option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_schema) = {
+    	json_schema: {
+        	required: ["id"]
+      	}
+    };
+
+	int64 id = 1;
+}
+
+message GetDeviceCommandsResponse {
+	oneof commans {
+		TemperatureCommands temperature = 1;
+	}
+}
+
+enum DeviceType {
+	TYPE_UNSPECIFIED = 0;
+	TYPE_HEATING_SYSTEM = 1;
+}
+
+message Device {
+	string name = 1;
+    int64 house_id = 2;
+    DeviceType type = 3;
+    string serial_number = 4;
+    bool status = 5;
+    google.protobuf.Timestamp created_at = 6;
+}
+
+message TemperatureCommands {
+	int32 target_temperature = 1;
+}

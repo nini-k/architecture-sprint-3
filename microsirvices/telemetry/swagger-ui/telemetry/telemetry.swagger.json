@@ -1,0 +1,211 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Telemetry API",
+    "description": "Микросервис для сбора телеметрических данных с устройств",
+    "version": "1.0",
+    "contact": {
+      "name": "device-manager",
+      "url": "github.com/nini-k/architecture-sprint-3/microsirvices/telemtry",
+      "email": "none@example.com"
+    },
+    "license": {}
+  },
+  "tags": [
+    {
+      "name": "TelemetryService"
+    }
+  ],
+  "schemes": [
+    "http"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/devices/{id}/telemetry": {
+      "get": {
+        "summary": "Получить исторические телеметрические данные",
+        "operationId": "TelemetryService_ListDeviceTelemetry",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/telemetryListDeviceTelemetryResponse"
+            }
+          },
+          "400": {
+            "description": "При некорретных значениях page_size или id",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          }
+        ],
+        "tags": [
+          "TelemetryService"
+        ]
+      }
+    },
+    "/devices/{id}/telemetry/latest": {
+      "get": {
+        "summary": "Получить последние телеметрические данные с датчиков устройства",
+        "operationId": "TelemetryService_ListLatestDeviceTelemetry",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/telemetryListLatestDeviceTelemetryResponse"
+            }
+          },
+          "400": {
+            "description": "При некорретных значениях id",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "required": true,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "cursor.id",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "int64"
+          }
+        ],
+        "tags": [
+          "TelemetryService"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "protobufAny": {
+      "type": "object",
+      "properties": {
+        "@type": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": {}
+    },
+    "rpcStatus": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/protobufAny"
+          }
+        }
+      }
+    },
+    "telemetryCursor": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "int64"
+        }
+      }
+    },
+    "telemetryListDeviceTelemetryResponse": {
+      "type": "object",
+      "properties": {
+        "records": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/telemetryTelemetryData"
+          }
+        },
+        "nextCursor": {
+          "$ref": "#/definitions/telemetryCursor"
+        }
+      }
+    },
+    "telemetryListLatestDeviceTelemetryResponse": {
+      "type": "object",
+      "properties": {
+        "records": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/telemetryTelemetryData"
+          }
+        }
+      }
+    },
+    "telemetryTelemetryData": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "int64"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "temperatureTelemetryData": {
+          "$ref": "#/definitions/telemetryTemperatureTelemetryData"
+        }
+      }
+    },
+    "telemetryTemperatureTelemetryData": {
+      "type": "object",
+      "properties": {
+        "temperature": {
+          "type": "integer",
+          "format": "int32"
+        }
+      }
+    }
+  }
+}

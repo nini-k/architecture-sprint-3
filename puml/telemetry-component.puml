@@ -1,0 +1,31 @@
+@startuml Components
+
+title Telemetry Service
+
+!include <C4/C4_Component>
+
+Container_Boundary(deviceManagerContainerBoundary, "device-manager") {
+    Component(GRPCGatewayComponent, "grpc-gateway", "go", "Обрабатывает входные HTTP/HTTPS запросы")
+    Component(GRPCClientComponent, "TelemetryServiceClient", "interface", "Вызывет функции grpc-сервера")
+    Component(GRPCServerComponent, "TelemetryServiceServer", "interface", "Принимает и обрабатывает входящие запросы")
+    Component(consumerComponent, "Consumer", "interface", "Предостовляет возможность подписаться на события о телеметрических данных")
+    Component(telemetryServiceComponent, "Service", "interface", "Предоставляет бизнес-функции")
+    Component(telemetryStorageComponent, "Storage", "interface", "Предоставляет обработчики для хранилища сервиса")
+}
+
+Container_Ext(APIGatewayContainerExt, "API Gateway", "go", "Перенаправляет внешний пользовательский трафик в внутреннию сеть")
+Container_Ext(databaseContainerExt, "telemetry", "MongoDB", "Хранит данные телеметрические данные с устройств")
+Container_Ext(kafkaContainerExt, "Kafka", "Message bus")
+
+Rel(APIGatewayContainerExt, GRPCGatewayComponent, "JSON", "HTTP/HTTPS")
+Rel(GRPCGatewayComponent, GRPCClientComponent, "Calls grpc", "protobuf")
+Rel(GRPCClientComponent, GRPCServerComponent, "Receive and handle incoming traffic", "protobuf")
+Rel(GRPCServerComponent, telemetryServiceComponent, "Calls methods")
+Rel(telemetryServiceComponent, telemetryStorageComponent, "Calls methods")
+Rel(telemetryStorageComponent, databaseContainerExt, "Uses", "NoSQL")
+Rel(consumerComponent, kafkaContainerExt, "Consume message", "TCP")
+Rel(consumerComponent, telemetryServiceComponent, "Calls methods")
+
+SHOW_LEGEND()
+
+@enduml

@@ -1,0 +1,49 @@
+@startuml Containers
+
+title Containers
+
+!include <C4/C4_Container>
+
+Person(UserPerson, "Пользователь умного дома")
+
+System_Boundary(SmartHomeSystemBoundary, "Система умного дома") {
+    Container(APIGatewayContainer, "API Gateway","go", "Центральная точка входа для всех запросов от внешних систем пользователей.")
+    Container_Boundary(SmartHomeManagerContainerBoundary, "Сервис управления умными домами") {
+        Container(SmartHomeManagerContainer, "smart-home-manager", "go", "Управляет умными домами пользователя")
+        ContainerDb(SmartHomeManagerContainerDB, "smart-home-manager", "PostgreSQL", "Хранит данные о доме устройствах")
+    }
+    Container_Boundary(DeviceManagerContainerBoundary, "Сервис управления устройствами умного дома") {
+        Container(DeviceManagerContainer, "device-manager", "go", "Управляет устройствами и их конфигурациями")
+        ContainerDb(DeviceManagerContainerDB, "device-manager", "PostgreSQL", "Хранит данные о устройствах")
+    }
+    Container_Boundary(UserManagerContainerBoundary, "Сервис управления пользователями") {
+        Container(UserManagerContainer, "user-manager", "go", "Управляет данными пользователей и их УЗ")
+        ContainerDb(UserManagerContainerDB, "user-manager", "PostgreSQL", "Хранит данные о пользователях")
+    }
+    Container_Boundary(TelemetryContainerBoundary, "Сервис сбора телеметрии") {
+        Container(TelemetryContainer, "telemetry", "go", "Собирает информациию и хранит информацию с датчиков устройств")
+        ContainerDb(TelemetryContainerDB, "telemetry", "mongo", "Хранит телеметрические данные устройств")
+    }
+    Container(DeviceAdapter, "device-adapter", "go", "Получает информацию с датчиков устройств")
+    SystemQueue(KafkaSystemQueue, "Kafka", "Message Brocker")
+
+Container_Ext(UIContainerExt, "Пользовательский интерфейс", "JavaScript/HTML", "Пользовательский интерфейс, разрабатываемый командой на аутсорсе")
+Container_Ext(DeviceLowLayerContainerExt, "Низкоуровневое API различных устройств")
+
+Rel(UserPerson, UIContainerExt, "Uses")
+Rel(UIContainerExt, APIGatewayContainer, "Запросы на yправление умным домом, управление пользовательскими данными, просмотр данных телеметрии и управление устройствами", "JSON" )
+Rel(APIGatewayContainer, UserManagerContainer, "Верификация пользователя и доступ к данным пользователя", "JSON")
+Rel(APIGatewayContainer, SmartHomeManagerContainer, "Запросы на yправление умным домом", "JSON")
+Rel(APIGatewayContainer, DeviceManagerContainer, "Запросы на изменение конфигурации и получение данных различных устройств", "JSON")
+Rel(APIGatewayContainer, TelemetryContainer, "Получение данных телеметрии с датчиков устройств", "JSON")
+Rel(UserManagerContainer, UserManagerContainerDB, "Read/Write", "SQL")
+Rel(SmartHomeManagerContainer, SmartHomeManagerContainerDB, "Read/Write", "SQL")
+Rel(DeviceManagerContainer, DeviceManagerContainerDB, "Read/Write", "SQL")
+Rel(TelemetryContainer, TelemetryContainerDB, "Read/Write", "SQL")
+Rel(TelemetryContainer, KafkaSystemQueue, "Чтение данных о телеметрии с датчиков устройства", "JSON")
+Rel(DeviceManagerContainer, KafkaSystemQueue, "Отправка событий об изменении конфигурации устройства", "JSON")
+Rel(DeviceAdapter, KafkaSystemQueue, "Отправка событий о телеметрии с датчиков устройства", "JSON")
+Rel(DeviceAdapter, DeviceLowLayerContainerExt, "Получение данных с датчиков устройств")
+
+SHOW_LEGEND()
+@enduml
