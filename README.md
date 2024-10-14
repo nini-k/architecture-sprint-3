@@ -99,7 +99,7 @@ Aнализ архитектуры монолитного приложения:
      
 - [C4 — Уровень контейнеров (Containers)](./puml/containers.puml)
 - [C4 — Уровень компонента Device Manager (Components)](./puml/device-manager-component.puml)
-- [C4 — Уровень компонента Telemetry (Components)](./puml/telemtry-telemetry.puml)
+- [C4 — Уровень компонента Telemetry (Components)](./puml/telemetry-component.puml)
 
 ## Подзадание 1.3: ER-диаграмма
 >К началу этого подзадания вы определили ключевые микросервисы и спроектировали их взаимодействие с использованием API Gateway и Kafka. А ещё визуализировали полученную архитектуру с помощью диаграмм C4, что позволило вам получить чёткое представление о структуре и взаимодействиях в системе. 
